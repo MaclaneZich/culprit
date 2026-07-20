@@ -152,6 +152,9 @@ The suite concentrates where correctness matters most:
   hand-computed expectations. Includes the case the whole app exists for: a
   frequently-eaten innocent food that trails every symptom must **not** outrank
   a real trigger eaten a third as often.
+- `test/insights_pipeline_test.dart` — the same scenario end to end, written
+  through the real database, ranked by the real engine, rendered by the real
+  Insights screen, and carried into the PDF.
 - `test/challenge_evaluator_test.dart` — the reproduced / did-not-reproduce /
   inconclusive rules, including that non-adherent and unlogged days carry no
   evidence.
