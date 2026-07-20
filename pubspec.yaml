@@ -1,0 +1,83 @@
+name: culprit
+description: >-
+  Culprit — a local-first iOS app that helps one person find which foods and
+  life factors are associated with their GI symptoms. Outputs candidates to
+  test with a clinician, never diagnoses.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management. Plain Riverpod v3 providers; codegen omitted because the
+  # current riverpod_generator conflicts with the Flutter-pinned `meta`.
+  flutter_riverpod: ^3.3.2
+
+  # Local, typed, migratable SQLite. All health data stays on the device.
+  drift: ^2.34.2
+  drift_flutter: ^0.3.1
+  path_provider: ^2.1.6
+  path: ^1.9.1
+
+  # Photo-assisted meal capture. image_picker's ImageSource.camera launches the
+  # native camera sheet — one tap, no custom preview stack (see ARCHITECTURE.md
+  # for why the `camera` package was dropped).
+  image_picker: ^1.2.3
+
+  # Charts on the Insights screen.
+  fl_chart: ^1.2.0
+
+  # Meal-capture nudges and challenge-day prompts. Local only.
+  flutter_local_notifications: ^22.1.0
+
+  # User-supplied LLM API key lives in the iOS keychain, never on disk.
+  flutter_secure_storage: ^10.3.1
+
+  # Doctor export.
+  pdf: ^3.12.0
+  printing: ^5.14.3
+
+  # The only network surface in the app: the user's own opt-in LLM API.
+  http: ^1.6.0
+
+  # Date formatting on the timeline and reports.
+  intl: ^0.20.3
+
+  # Renders the original in-repo SVG illustrations and icon set.
+  flutter_svg: ^2.0.0
+
+  cupertino_icons: ^1.0.8
+
+  # Shares the CSV/data export via the system share sheet (PDF sharing is
+  # handled by `printing`).
+  share_plus: ^13.2.1
+
+  # Correct local-time scheduling for the daily check-in nudges.
+  flutter_timezone: ^5.1.0
+  timezone: ^0.11.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.34.0
+  build_runner: ^2.15.1
+  flutter_launcher_icons: ^0.14.4
+  image: ^4.8.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/
+    - assets/illustrations/
+    - assets/icons/
+
+flutter_launcher_icons:
+  ios: true
+  android: false
+  image_path: assets/brand/app_icon_1024.png
+  remove_alpha_ios: true
