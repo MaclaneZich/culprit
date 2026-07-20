@@ -14,7 +14,8 @@ class ExposureEvent {
     required this.foodKeys,
     required this.tagKeys,
     this.weight = 1.0,
-    this.keyWeights = const {},
+    this.foodWeights = const {},
+    this.tagWeights = const {},
   });
 
   final DateTime timestamp;
@@ -30,9 +31,20 @@ class ExposureEvent {
 
   /// Per-candidate overrides: a vision-guessed, unconfirmed ingredient
   /// counts at reduced weight without discounting the rest of the meal.
-  final Map<String, double> keyWeights;
+  ///
+  /// Foods and tags are kept in separate maps because their key spaces
+  /// overlap — a user may well type an ingredient called "caffeine" or
+  /// "gluten", which are also [TriggerTag] names. Sharing one map would let
+  /// an unconfirmed ingredient silently discount the identically-named
+  /// trigger class.
+  final Map<String, double> foodWeights;
+  final Map<String, double> tagWeights;
 
-  double weightFor(String key) => weight * (keyWeights[key] ?? 1.0);
+  double weightFor(String key, CandidateKind kind) {
+    final overrides =
+        kind == CandidateKind.food ? foodWeights : tagWeights;
+    return weight * (overrides[key] ?? 1.0);
+  }
 }
 
 class SymptomEvent {

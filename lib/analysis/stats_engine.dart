@@ -104,7 +104,7 @@ class StatsEngine {
     byKey.forEach((key, mealIndexes) {
       double totalWeight = 0;
       for (final i in mealIndexes) {
-        totalWeight += meals[i].weightFor(key);
+        totalWeight += meals[i].weightFor(key, kind);
       }
       if (totalWeight < config.minExposures) return;
 
@@ -115,7 +115,7 @@ class StatsEngine {
         double followedWeight = 0;
         for (final i in mealIndexes) {
           if (followedByWindow[i]![w]) {
-            followedWeight += meals[i].weightFor(key);
+            followedWeight += meals[i].weightFor(key, kind);
           }
         }
         windows.add(WindowStats(
