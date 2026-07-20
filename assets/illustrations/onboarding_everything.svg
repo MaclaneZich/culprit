@@ -1,0 +1,20 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- calendar: every day counts, calm ones included -->
+  <rect x="40" y="34" width="120" height="98" rx="8" stroke="#8F8A80" stroke-width="3.5"/>
+  <line x1="40" y1="58" x2="160" y2="58" stroke="#8F8A80" stroke-width="3"/>
+  <line x1="66" y1="24" x2="66" y2="42" stroke="#8F8A80" stroke-width="3.5"/>
+  <line x1="134" y1="24" x2="134" y2="42" stroke="#8F8A80" stroke-width="3.5"/>
+  <!-- logged dots: mostly calm (gray), a few bad (clay) -->
+  <circle cx="62" cy="74" r="4" fill="#8F8A80"/>
+  <circle cx="87" cy="74" r="4" fill="#8F8A80"/>
+  <circle cx="112" cy="74" r="4" fill="#A85638"/>
+  <circle cx="137" cy="74" r="4" fill="#8F8A80"/>
+  <circle cx="62" cy="96" r="4" fill="#8F8A80"/>
+  <circle cx="87" cy="96" r="4" fill="#8F8A80"/>
+  <circle cx="112" cy="96" r="4" fill="#8F8A80"/>
+  <circle cx="137" cy="96" r="4" fill="#8F8A80"/>
+  <circle cx="62" cy="118" r="4" fill="#A85638"/>
+  <circle cx="87" cy="118" r="4" fill="#8F8A80"/>
+  <circle cx="112" cy="118" r="4" fill="#8F8A80"/>
+  <circle cx="137" cy="118" r="4" fill="#8F8A80"/>
+</svg>
