@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Culprit app icon master.
+     Concept: a lineup of suspects, one singled out under the magnifier.
+     Palette: warm off-white surface, near-black ink, single clay accent.
+     Keep in sync with tool/generate_icon.dart, which rasterizes this
+     geometry to app_icon_1024.png. -->
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#FAF7F2"/>
+
+  <!-- the lineup -->
+  <circle cx="152" cy="512" r="56" fill="none" stroke="#1D1B17" stroke-width="16"/>
+  <circle cx="392" cy="512" r="56" fill="none" stroke="#1D1B17" stroke-width="16"/>
+  <circle cx="872" cy="512" r="56" fill="none" stroke="#1D1B17" stroke-width="16"/>
+
+  <!-- the culprit -->
+  <circle cx="632" cy="512" r="56" fill="#A85638"/>
+
+  <!-- the magnifier -->
+  <circle cx="632" cy="512" r="120" fill="none" stroke="#1D1B17" stroke-width="28"/>
+  <line x1="722" y1="602" x2="838" y2="718" stroke="#1D1B17" stroke-width="28" stroke-linecap="round"/>
+</svg>
