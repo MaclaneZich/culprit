@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  analyze-and-test:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Pin the version the project was built against so a Flutter
+          # release cannot silently change the result of a run.
+          flutter-version: '3.41.7'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # The Drift output (lib/data/db/database.g.dart) is committed, so no
+      # code generation is needed here. This step fails the build if the
+      # committed file has drifted from the schema it is generated from.
+      - name: Verify generated code is up to date
+        run: |
+          dart run build_runner build
+          git diff --exit-code -- lib/data/db/database.g.dart
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+  build-ios:
+    name: Build iOS (no signing)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.7'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Compiles the app and runs pod install, which is the check a Windows
+      # or Linux machine cannot perform. Unsigned, so it needs no secrets.
+      - name: Build
+        run: flutter build ios --release --no-codesign

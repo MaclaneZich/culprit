@@ -17,7 +17,10 @@ import '../../services/notifications/notification_service.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  static const repoUrl = 'https://github.com/culprit-app/culprit';
+  /// Public repository URL. Set this once the repo is published — the About
+  /// card omits the line while it is empty rather than printing a link that
+  /// does not resolve.
+  static const repoUrl = '';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -174,7 +177,9 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: Space.x3),
                   Text(
-                    'Culprit is open source (MIT): $repoUrl',
+                    repoUrl.isEmpty
+                        ? 'Culprit is open source (MIT).'
+                        : 'Culprit is open source (MIT): $repoUrl',
                     style: TypeRamp.caption.copyWith(color: tones.slate),
                   ),
                 ],
