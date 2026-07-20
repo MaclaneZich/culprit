@@ -21,14 +21,15 @@ class AnalysisService {
     for (final entry in meals) {
       final foodKeys = <String>{};
       final tagKeys = <String>{};
-      final keyWeights = <String, double>{};
+      final foodWeights = <String, double>{};
+      final tagWeights = <String, double>{};
       final confirmedTags = <String>{};
       for (final detail in entry.ingredients) {
         final key = detail.ingredient.canonicalName.toLowerCase();
         foodKeys.add(key);
         foodNames[key] = detail.ingredient.canonicalName;
         if (detail.confidence == IngredientConfidence.guessed) {
-          keyWeights[key] = config.guessedIngredientWeight;
+          foodWeights[key] = config.guessedIngredientWeight;
         }
         for (final tag in detail.ingredient.triggerTags) {
           tagKeys.add(tag.name);
@@ -41,14 +42,15 @@ class AnalysisService {
       // a tag carried only by guesses gets the guessed discount.
       for (final tag in tagKeys) {
         if (!confirmedTags.contains(tag)) {
-          keyWeights[tag] = config.guessedIngredientWeight;
+          tagWeights[tag] = config.guessedIngredientWeight;
         }
       }
       exposures.add(ExposureEvent(
         timestamp: entry.meal.timestamp,
         foodKeys: foodKeys,
         tagKeys: tagKeys,
-        keyWeights: keyWeights,
+        foodWeights: foodWeights,
+        tagWeights: tagWeights,
       ));
     }
 
