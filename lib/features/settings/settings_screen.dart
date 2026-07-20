@@ -17,10 +17,9 @@ import '../../services/notifications/notification_service.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  /// Public repository URL. Set this once the repo is published — the About
-  /// card omits the line while it is empty rather than printing a link that
-  /// does not resolve.
-  static const repoUrl = '';
+  /// Public repository. The About card omits this line while it is empty,
+  /// rather than printing a link that does not resolve.
+  static const repoUrl = 'https://github.com/MaclaneZich/culprit';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

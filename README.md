@@ -1,5 +1,8 @@
 # Culprit
 
+[![CI](https://github.com/MaclaneZich/culprit/actions/workflows/ci.yml/badge.svg)](https://github.com/MaclaneZich/culprit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-A85638.svg)](LICENSE)
+
 A local-first iOS app that helps one person find which foods and life factors
 are **associated** with their GI symptoms.
 
@@ -110,7 +113,7 @@ never bundled, never committed, and never logged.
 Requires the Flutter SDK (3.41+) and Xcode for device builds.
 
 ```bash
-git clone https://github.com/<your-username>/culprit.git
+git clone https://github.com/MaclaneZich/culprit.git
 cd culprit
 flutter pub get
 dart run build_runner build          # generates the Drift database code
