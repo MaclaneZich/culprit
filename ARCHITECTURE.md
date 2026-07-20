@@ -81,9 +81,14 @@ testing and the part most expensive to get wrong.
 ## Analysis details worth knowing
 
 **Weighting.** A meal contributes weight 1.0. An unconfirmed (vision-guessed)
-ingredient contributes 0.5 *for that ingredient only* — via `keyWeights`, so a
-bad guess doesn't discount the rest of the meal. A trigger tag counts at full
-weight if any confirmed ingredient carries it.
+ingredient contributes 0.5 *for that ingredient only*, so a bad guess doesn't
+discount the rest of the meal. A trigger tag counts at full weight if any
+confirmed ingredient carries it.
+
+Food and tag weights live in separate maps on `ExposureEvent`, because the two
+key spaces overlap: a user may type an ingredient named "caffeine" or "gluten",
+which are also `TriggerTag` names. One shared map would let an unconfirmed
+ingredient silently discount the identically-named trigger class.
 
 **Lag windows** are half-open, `[start, end)`. A symptom exactly at +1 h falls
 in the 1–4 h window, not 0–1 h. Symptoms before the meal never count.

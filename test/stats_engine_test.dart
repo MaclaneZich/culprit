@@ -244,7 +244,7 @@ void main() {
           timestamp: at(0, 12),
           foodKeys: const {'rice', 'onion'},
           tagKeys: const {},
-          keyWeights: const {'onion': 0.5}, // onion guessed, rice confirmed
+          foodWeights: const {'onion': 0.5}, // onion guessed, rice confirmed
         ),
         meal(at(1, 12), ['rice', 'onion']),
       ];
@@ -265,6 +265,37 @@ void main() {
             .followed,
         closeTo(0.5, 1e-9),
       );
+    });
+
+    test('a food named like a trigger tag does not corrupt that tag\'s '
+        'weight', () {
+      // Users do type ingredients called "caffeine" or "gluten", which are
+      // also TriggerTag names. Food and tag weights live in separate maps so
+      // an unconfirmed ingredient cannot discount the identically-named
+      // class carried by a confirmed ingredient.
+      final meals = [
+        for (var d = 0; d < 4; d++)
+          ExposureEvent(
+            timestamp: at(d, 12),
+            foodKeys: const {'caffeine', 'coffee'},
+            tagKeys: const {'caffeine'},
+            // The literal ingredient "caffeine" was guessed; the caffeine
+            // *class* is carried by confirmed coffee, so it keeps full weight.
+            foodWeights: const {'caffeine': 0.5},
+          ),
+      ];
+
+      final result = StatsEngine(
+        config: const AnalysisConfig(minExposures: 1),
+      ).analyze(meals: meals, symptoms: [symptom(at(0, 13))]);
+
+      final foodCandidate = result.candidates.singleWhere(
+          (c) => c.key == 'caffeine' && c.kind == CandidateKind.food);
+      final tagCandidate = result.candidates.singleWhere(
+          (c) => c.key == 'caffeine' && c.kind == CandidateKind.tag);
+
+      expect(foodCandidate.totalExposures, closeTo(2.0, 1e-9));
+      expect(tagCandidate.totalExposures, closeTo(4.0, 1e-9));
     });
   });
 
