@@ -110,7 +110,7 @@ never bundled, never committed, and never logged.
 Requires the Flutter SDK (3.41+) and Xcode for device builds.
 
 ```bash
-git clone https://github.com/culprit-app/culprit.git
+git clone https://github.com/<your-username>/culprit.git
 cd culprit
 flutter pub get
 dart run build_runner build          # generates the Drift database code
