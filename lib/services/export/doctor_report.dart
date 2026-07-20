@@ -8,6 +8,28 @@ import '../../analysis/models.dart';
 import '../../data/db/database.dart';
 import '../../domain/enums.dart';
 
+/// Maps typographic punctuation to ASCII for the PDF.
+///
+/// The report uses the built-in Helvetica, which is WinAnsi-encoded: accented
+/// Latin characters are fine, but the General Punctuation block is not, and
+/// unsupported glyphs are dropped **silently** — a clinician would receive a
+/// report with characters missing. Lag-window labels ("1–4 h") and several
+/// report sentences use en/em dashes, so every string on its way into the
+/// document goes through here. Bundling a Unicode TTF would also work; it
+/// costs ~300KB of repo weight to gain characters this report never needs.
+///
+/// Public so `test/insights_pipeline_test.dart` can pin the mapping.
+String asciiForPdf(String value) => value
+    .replaceAll('—', '-') // em dash
+    .replaceAll('–', '-') // en dash
+    .replaceAll('·', '-') // middle dot
+    .replaceAll('×', 'x') // multiplication sign
+    .replaceAll('‘', "'")
+    .replaceAll('’', "'")
+    .replaceAll('“', '"')
+    .replaceAll('”', '"')
+    .replaceAll('…', '...');
+
 /// One-tap PDF for the gastroenterologist. Clean summary, no fluff:
 /// logging completeness, top candidates with the actual numbers, challenge
 /// results, symptom frequency. Association framing throughout.
@@ -37,11 +59,14 @@ class DoctorReportBuilder {
     final completeness = analysis.completeness;
     final dateFormat = DateFormat('MMM d, yyyy');
 
+    pw.Widget text(String value, pw.TextStyle style) =>
+        pw.Text(asciiForPdf(value), style: style);
+
     pw.Widget section(String name, pw.Widget child) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.SizedBox(height: 16),
-            pw.Text(name, style: heading),
+            text(name, heading),
             pw.Container(
                 margin: const pw.EdgeInsets.symmetric(vertical: 4),
                 height: 0.5,
@@ -52,8 +77,10 @@ class DoctorReportBuilder {
 
     pw.Widget table(List<String> headers, List<List<String>> rows) =>
         pw.TableHelper.fromTextArray(
-          headers: headers,
-          data: rows,
+          headers: [for (final h in headers) asciiForPdf(h)],
+          data: [
+            for (final row in rows) [for (final cell in row) asciiForPdf(cell)],
+          ],
           headerStyle: cellHeader,
           cellStyle: body,
           border: null,
@@ -83,40 +110,40 @@ class DoctorReportBuilder {
         footer: (context) => pw.Container(
           alignment: pw.Alignment.center,
           margin: const pw.EdgeInsets.only(top: 12),
-          child: pw.Text(
-            'Culprit log summary — associations from self-tracking, not a '
-            'diagnosis. Generated ${dateFormat.format(DateTime.now())} · '
+          child: text(
+            'Culprit log summary - associations from self-tracking, not a '
+            'diagnosis. Generated ${dateFormat.format(DateTime.now())} - '
             'page ${context.pageNumber}/${context.pagesCount}',
-            style: caption,
+            caption,
           ),
         ),
         build: (context) => [
-          pw.Text('GI Symptom & Food Log — Summary', style: title),
+          text('GI Symptom & Food Log - Summary', title),
           pw.SizedBox(height: 4),
-          pw.Text(
+          text(
             completeness.firstLog != null && completeness.lastLog != null
                 ? 'Self-tracked with Culprit, '
-                    '${dateFormat.format(completeness.firstLog!)} – '
+                    '${dateFormat.format(completeness.firstLog!)} to '
                     '${dateFormat.format(completeness.lastLog!)}'
                 : 'Self-tracked with Culprit',
-            style: const pw.TextStyle(fontSize: 10, color: secondary),
+            const pw.TextStyle(fontSize: 10, color: secondary),
           ),
           section(
             'Logging completeness',
-            pw.Text(
+            text(
               '${completeness.totalMeals} meals over '
               '${completeness.loggedDays} days '
               '(${(completeness.mealCoverage * 100).round()}% of the span '
               'with 2+ meals logged); daily context recorded on '
               '${completeness.daysWithContext} days; '
               '${completeness.totalSymptoms} symptom episodes.',
-              style: body,
+              body,
             ),
           ),
           section(
             'Symptom frequency',
             sortedTypes.isEmpty
-                ? pw.Text('No episodes logged.', style: body)
+                ? text('No episodes logged.', body)
                 : pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
@@ -128,9 +155,9 @@ class DoctorReportBuilder {
                         ],
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text(
-                        '$severeCount episode(s) at severity 4–5.',
-                        style: caption,
+                      text(
+                        '$severeCount episode(s) at severity 4-5.',
+                        caption,
                       ),
                     ],
                   ),
@@ -138,9 +165,10 @@ class DoctorReportBuilder {
           section(
             'Top candidates (associations, not causes)',
             !analysis.hasEnoughData
-                ? pw.Text(
+                ? text(
                     'Log not yet complete enough for a reliable ranking.',
-                    style: body)
+                    body,
+                  )
                 : pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
@@ -169,13 +197,13 @@ class DoctorReportBuilder {
                         ],
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text(
+                      text(
                         'Score = symptom rate after the candidate (shrunk '
                         'toward the base rate for small samples) divided by '
                         'the rate after any meal. 1.0x means '
                         'indistinguishable from any meal. These are '
                         'candidates to test, not conclusions.',
-                        style: caption,
+                        caption,
                       ),
                     ],
                   ),
@@ -200,7 +228,7 @@ class DoctorReportBuilder {
           section(
             'Reintroduction challenges',
             challenges.isEmpty
-                ? pw.Text('None run yet.', style: body)
+                ? text('None run yet.', body)
                 : table(
                     ['Candidate', 'Started', 'Status', 'Result'],
                     [
@@ -208,8 +236,10 @@ class DoctorReportBuilder {
                         [
                           c.title,
                           dateFormat.format(c.startDate),
-                          c.blinded ? '${c.status.label}, blinded' : c.status.label,
-                          c.outcome?.label ?? '—',
+                          c.blinded
+                              ? '${c.status.label}, blinded'
+                              : c.status.label,
+                          c.outcome?.label ?? '-',
                         ],
                     ],
                   ),
@@ -221,11 +251,11 @@ class DoctorReportBuilder {
               border: pw.Border.all(color: accent, width: 0.5),
               borderRadius: pw.BorderRadius.circular(6),
             ),
-            child: pw.Text(
+            child: text(
               'Patient has been advised that these are statistical '
               'associations from passive self-tracking, and to continue '
               'eating gluten pending celiac evaluation.',
-              style: const pw.TextStyle(fontSize: 9, color: secondary),
+              const pw.TextStyle(fontSize: 9, color: secondary),
             ),
           ),
         ],
