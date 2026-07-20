@@ -1,0 +1,14 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- shortlist card: candidates, not conclusions -->
+  <rect x="36" y="30" width="94" height="104" rx="8" stroke="#8F8A80" stroke-width="3.5"/>
+  <circle cx="54" cy="54" r="5" stroke="#A85638" stroke-width="3"/>
+  <line x1="68" y1="54" x2="112" y2="54" stroke="#8F8A80" stroke-width="3"/>
+  <circle cx="54" cy="80" r="5" stroke="#A85638" stroke-width="3"/>
+  <line x1="68" y1="80" x2="104" y2="80" stroke="#8F8A80" stroke-width="3"/>
+  <circle cx="54" cy="106" r="5" stroke="#8F8A80" stroke-width="3"/>
+  <line x1="68" y1="106" x2="108" y2="106" stroke="#8F8A80" stroke-width="3"/>
+  <!-- handed onward: the stethoscope loop -->
+  <path d="M142 58 C142 44 166 44 166 58 L166 84 A14 14 0 0 1 138 84 L138 74" stroke="#5C7078" stroke-width="3.5"/>
+  <circle cx="152" cy="112" r="9" stroke="#5C7078" stroke-width="3.5"/>
+  <path d="M152 98 L152 103" stroke="#5C7078" stroke-width="3.5"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- plate -->
+  <circle cx="76" cy="84" r="44" stroke="#8F8A80" stroke-width="3.5"/>
+  <circle cx="76" cy="84" r="28" stroke="#8F8A80" stroke-width="2.5"/>
+  <circle cx="70" cy="78" r="5" fill="#A85638"/>
+  <circle cx="86" cy="92" r="4" fill="#8F8A80"/>
+  <!-- notebook -->
+  <rect x="122" y="46" width="52" height="72" rx="6" stroke="#5C7078" stroke-width="3.5"/>
+  <line x1="132" y1="64" x2="164" y2="64" stroke="#5C7078" stroke-width="3"/>
+  <line x1="132" y1="78" x2="158" y2="78" stroke="#5C7078" stroke-width="3"/>
+  <line x1="132" y1="92" x2="162" y2="92" stroke="#5C7078" stroke-width="3"/>
+  <!-- pencil tick -->
+  <path d="M150 128 L162 116" stroke="#A85638" stroke-width="4"/>
+</svg>
