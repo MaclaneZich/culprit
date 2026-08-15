@@ -10,6 +10,37 @@ Culprit makes it effortless to log every meal and daily context, log symptom
 episodes with structure, and then surfaces a ranked list of candidate triggers
 worth testing — plus a module to run a proper reintroduction challenge.
 
+## Engineering notes
+
+Three constraints in this repo are enforced by tooling rather than by
+discipline, because a health app that drifts is a health app that misleads.
+
+**The build fails if causal language reaches the user.**
+[`test/honest_copy_test.dart`](test/honest_copy_test.dart) is a lint-style gate
+over the six files that render insight-facing copy. It reduces Dart source to
+the text a user would actually see — stripping comments, joining adjacent
+string literals so a sentence split across lines is still checked as one
+sentence — then rejects causal verbs (`cause/causes/caused/causing`), anything
+matching `diagnos`, verdict phrasing (`your trigger is`), and proof claims
+(`proves/proven`). Explicit negations like "not a diagnosis" are allowlisted,
+since honest framing has to be able to name the thing it denies. This runs on
+every push and pull request, so the honesty claim in this README is a test
+result, not a promise.
+
+**The repository cannot accumulate PHI.** `.gitignore` excludes the on-device
+SQLite databases, `/exports/`, `**/meal_photos/`, generated report PDFs, and
+loose CSVs (with a carve-out for test fixtures) — so a real device's data
+cannot be committed by accident.
+
+**No API key is ever in the repo or the binary.** The optional LLM layer uses a
+key the user pastes into Settings at runtime, stored in the iOS keychain via
+`flutter_secure_storage`. `.env.example` contains no key and exists only to
+document that fact.
+
+CI additionally regenerates the Drift database code and fails if the committed
+output has drifted from the schema, and compiles the iOS app unsigned on a
+macOS runner — the check a Linux machine can't perform.
+
 ## What it is, honestly
 
 The honest ceiling of passive self-tracking is **a ranked shortlist of things
@@ -137,10 +168,28 @@ to the keychain. To remove it, tap **Disconnect and delete key**.
 
 ## Screenshots
 
-Not yet captured. To generate them, run the app on an iPhone simulator and
-grab: the timeline with a few days logged, the Insights ranking with an
-expanded candidate card, the Challenge Lab result readout, and the doctor
-export preview. Drop the PNGs in `docs/screenshots/` and link them here.
+Run the app on an iPhone simulator with a few days of data seeded, capture the
+four shots below, drop the PNGs in `docs/screenshots/`, and delete the comment
+above each one as you fill it in.
+
+<!-- SHOT 1 — timeline.png: the main timeline with 4-5 days logged, showing a
+     mix of ordinary meals and one symptom episode. This is the "logging is
+     cheap" claim; it should look dense but calm. -->
+<!-- ![Timeline](docs/screenshots/timeline.png) -->
+
+<!-- SHOT 2 — insights.png: the Insights ranking with one candidate card
+     expanded so the base rate vs. symptom rate comparison is visible. This is
+     the single most important image in the repo — it is the denominator
+     argument made concrete. -->
+<!-- ![Insights ranking](docs/screenshots/insights.png) -->
+
+<!-- SHOT 3 — challenge.png: a completed Challenge Lab readout, showing the
+     reintroduction schedule and its result. -->
+<!-- ![Challenge Lab](docs/screenshots/challenge.png) -->
+
+<!-- SHOT 4 — doctor-report.png: the doctor export preview. Use seeded demo
+     data only — never a real log. -->
+<!-- ![Doctor report](docs/screenshots/doctor-report.png) -->
 
 ## Tests
 
