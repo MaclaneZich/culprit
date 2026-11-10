@@ -33,7 +33,7 @@ So it is never given the chance:
 4. With no API key, the ranked list renders from step 1 alone.
 
 The one exception is the vision ingredient-guess, which sends a single photo
-you just took — and its output is treated as *unconfirmed*: guessed
+you just took, and its output is treated as *unconfirmed*: guessed
 ingredients are stored with `IngredientConfidence.guessed`, shown with a `?`,
 and down-weighted in the analysis until you confirm them.
 
@@ -44,7 +44,7 @@ see or infer the raw log?* If yes, compute it in Dart first.
 
 ```
 lib/
-  analysis/          pure Dart, no Flutter imports — runs under `dart test`
+  analysis/          pure Dart, no Flutter imports; runs under `dart test`
     models.dart              inputs/outputs of the engine
     stats_engine.dart        the denominator-aware scoring
     challenge_evaluator.dart reintroduction schedule + readout rules
@@ -53,7 +53,7 @@ lib/
     theme/           design tokens + ThemeData (no magic numbers in widgets)
     copy/            shared user-facing strings, guarded by a test
   data/db/           Drift tables, converters, seed ingredient library
-  domain/            enums stored by name — add values, never rename
+  domain/            enums stored by name; add values, never rename
   features/          one folder per screen
   services/
     llm/             the only network surface in the app
@@ -71,7 +71,7 @@ testing and the part most expensive to get wrong.
 - **Enums are stored by `name`.** Renaming an enum value is a silent data
   migration. Add new values; never rename existing ones.
 - **Migrations from day one.** `schemaVersion` starts at 1 with an
-  `onUpgrade` hook already in place. Additive changes only — never lose a
+  `onUpgrade` hook already in place. Additive changes only. Never lose a
   user's log.
 - **Ingredients are upserted by canonical name** and carry trigger-class tags,
   so the library grows with use and tags accumulate rather than overwrite.
@@ -97,7 +97,7 @@ in the 1–4 h window, not 0–1 h. Symptoms before the meal never count.
 meal. Candidates below `minExposures` (3 weighted) are not ranked at all, and
 the entire ranking is withheld below `minSymptoms` (3 episodes).
 
-**Day factors** threshold continuous context into binary presence — sleep < 6 h
+**Day factors** threshold continuous context into binary presence: sleep < 6 h
 is `short-sleep`, stress ≥ 4 is `high-stress`, and so on
 (`AnalysisService.buildDayFactors`). Their base rate is the share of *logged
 days* that were symptomatic, so the same denominator logic applies.
@@ -108,7 +108,7 @@ that day is excluded rather than counted against either arm.
 
 ## State management
 
-Riverpod v3, plain providers (no codegen — `riverpod_generator` currently
+Riverpod v3, plain providers (no codegen; `riverpod_generator` currently
 conflicts with the Flutter-pinned `meta`). `databaseProvider` is overridden in
 tests with an in-memory Drift database; `analysisProvider` recomputes from the
 three stream providers whenever the log changes, which at personal-log scale is

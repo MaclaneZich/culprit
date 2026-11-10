@@ -3,193 +3,59 @@
 [![CI](https://github.com/MaclaneZich/culprit/actions/workflows/ci.yml/badge.svg)](https://github.com/MaclaneZich/culprit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-A85638.svg)](LICENSE)
 
-A local-first iOS app that helps one person find which foods and life factors
-are **associated** with their GI symptoms.
+A local-first iOS app that ranks which foods and daily factors are associated with one person's GI symptoms, so they have a short list worth testing with a clinician. It surfaces candidates, never causes, and the build fails if the UI copy says otherwise.
 
-Culprit makes it effortless to log every meal and daily context, log symptom
-episodes with structure, and then surfaces a ranked list of candidate triggers
-worth testing — plus a module to run a proper reintroduction challenge.
+**Status:** prototype, not on the App Store. Built over summer 2026 with heavy use of Claude Code. Runs on the iOS simulator and on device; CI compiles the iOS target and runs the test suite on every push.
 
-## Engineering notes
+## What it does
 
-Three constraints in this repo are enforced by tooling rather than by
-discipline, because a health app that drifts is a health app that misleads.
+1. Log every meal. Camera first, optional vision guess, you confirm the ingredients.
+2. Daily check-in for sleep, stress, alcohol, caffeine, exercise, cycle phase, hydration, illness.
+3. Log symptom episodes with timestamp, type, severity 1 to 5, and time since the last meal.
+4. Read a ranked list of candidate triggers with the counts behind each score.
+5. Run a structured reintroduction challenge: washout, scheduled on/off days, a reproduced / did not reproduce / inconclusive verdict.
+6. Export a PDF and CSV for your doctor.
 
-**The build fails if causal language reaches the user.**
-[`test/honest_copy_test.dart`](test/honest_copy_test.dart) is a lint-style gate
-over the six files that render insight-facing copy. It reduces Dart source to
-the text a user would actually see — stripping comments, joining adjacent
-string literals so a sentence split across lines is still checked as one
-sentence — then rejects causal verbs (`cause/causes/caused/causing`), anything
-matching `diagnos`, verdict phrasing (`your trigger is`), and proof claims
-(`proves/proven`). Explicit negations like "not a diagnosis" are allowlisted,
-since honest framing has to be able to name the thing it denies. This runs on
-every push and pull request, so the honesty claim in this README is a test
-result, not a promise.
+## How the ranking works
 
-**The repository cannot accumulate PHI.** `.gitignore` excludes the on-device
-SQLite databases, `/exports/`, `**/meal_photos/`, generated report PDFs, and
-loose CSVs (with a carve-out for test fixtures) — so a real device's data
-cannot be committed by accident.
+Everything is computed on-device in Dart. Most food diaries only see the meals before an attack, so the foods you eat most always "lead" the most attacks. Culprit compares `rate(symptom | ate food)` against that food's base rate across every logged meal, which is why the app pushes you to log calm days too.
 
-**No API key is ever in the repo or the binary.** The optional LLM layer uses a
-key the user pastes into Settings at runtime, stored in the iOS keychain via
-`flutter_secure_storage`. `.env.example` contains no key and exists only to
-document that fact.
-
-CI additionally regenerates the Drift database code and fails if the committed
-output has drifted from the schema, and compiles the iOS app unsigned on a
-macOS runner — the check a Linux machine can't perform.
-
-## What it is, honestly
-
-The honest ceiling of passive self-tracking is **a ranked shortlist of things
-worth testing**. Culprit is built to hit that ceiling well and then stop:
-
-- It surfaces **candidates**, never causes. Every analysis surface says "worth
-  testing," and a test in the suite fails the build if causal or diagnostic
-  language creeps into the copy.
-- It is **not a medical device**, not diagnostic, and does not replace a GI
-  workup. A first-run disclaimer says so before anything can be logged.
-- It reminds you, persistently, that **celiac testing requires actively eating
-  gluten** — so don't eliminate foods before you've been worked up.
-
-The output is designed to be handed to a gastroenterologist.
-
-## Why most food diaries lie
-
-**The denominator is everything.** People log when they feel bad. If the app
-only sees the meals before an attack, it cannot tell a real trigger from a food
-you simply eat often — the foods you eat most will always "lead" the most
-attacks.
-
-Culprit compares `rate(symptom | ate food)` against that food's **base rate**
-across every logged meal. That only works if calm days are logged too, so the
-whole app is built to make logging every meal the path of least resistance.
-
-The same logic applies to non-food factors. Sleep, stress, alcohol, caffeine,
-skipped meals, hard exercise, cycle phase, hydration, and illness are logged
-continuously — not just on bad days — because for many people the gut-brain
-axis is a live driver, not a footnote.
-
-## Core loop
-
-1. **Log every meal.** One tap to the camera; an optional vision guess
-   pre-fills ingredients; you confirm or correct in seconds. The confirm step
-   is what matters, because the real triggers are usually invisible in a photo
-   — butter vs. oil, cream sauces, garlic and onion, wheat thickeners, HFCS,
-   portion size.
-2. **Check in daily.** A light morning/evening prompt for sleep, stress, and
-   the day's factors.
-3. **Log symptoms with structure.** Timestamp, type(s), severity 1–5, and time
-   since the last meal — "20 minutes after eggs" and "3 hours after eggs"
-   implicate different mechanisms, so the app captures which.
-4. **Read the ranked candidates.** Association scores with a lag-window
-   breakdown and the raw counts behind them.
-5. **Run a challenge.** Correlation gets you a list; a structured
-   reintroduction (washout, then scheduled on/off days) gets you an answer:
-   reproduced / did not reproduce / inconclusive.
-6. **Export for your doctor.** One-tap PDF and CSV.
-
-## How the analysis works
-
-Everything is computed on-device in Dart. For each candidate — a food, or a
-trigger class like *fructan* or *lactose* — and each lag window (0–1 h, 1–4 h,
-4–12 h), the engine counts weighted exposures and how many were followed by an
-episode, then compares that rate to the base rate across all meals:
+For each candidate (a food, or a class like *fructan* or *lactose*) and each lag window (0 to 1 h, 1 to 4 h, 4 to 12 h):
 
 ```
-score = shrunk_rate / base_rate      where
-shrunk_rate = (followed + m·base_rate) / (exposures + m),  m = 3
+score = shrunk_rate / base_rate
+shrunk_rate = (followed + m * base_rate) / (exposures + m),  m = 3
 ```
 
-The shrinkage term is a small-sample penalty: it pulls sparse candidates toward
-the base rate so one bad night after a rare food cannot top the ranking. A
-score of `1.0×` means the candidate is indistinguishable from any random meal.
+The shrinkage term pulls sparse candidates toward the base rate so one bad night after a rare food can't top the list. A score of 1.0 means the candidate looks like any random meal. These are associations, not causal estimates, and the UI says so.
 
-Analysis runs at both the food level and the **trigger-class** level, because
-the real signal is often a class (FODMAPs) rather than a single food — four
-different dairy foods eaten once each are invisible individually but visible as
-`lactose`.
+## Tech
 
-These are associations, not causal estimates, and the UI says so.
+- Flutter / Dart, iOS target
+- Drift (SQLite) for on-device storage; no account, no cloud, no analytics
+- Optional LLM layer (Anthropic or OpenAI, your own key, stored in the iOS keychain via `flutter_secure_storage`). It only pre-fills ingredients from a photo and narrates the already-computed ranking. Raw logs never leave the device.
+- PDF and CSV export
+- GitHub Actions: analyze, test, Drift codegen drift check, unsigned iOS build on macOS
 
-## The LLM is optional, and never sees your log
+## Three things enforced by tests, not discipline
 
-Culprit ships with **no API key** and is fully functional without one. If you
-choose to connect your own key (Anthropic or OpenAI), it enables exactly two
-things:
+- `test/honest_copy_test.dart` rejects causal verbs, "diagnos*", verdict phrasing and proof claims in any user-facing string. Negations like "not a diagnosis" are allowed.
+- `.gitignore` excludes on-device databases, exports, meal photos, report PDFs and loose CSVs, so a device's data can't be committed by accident.
+- No API key exists in the repo or the binary. `.env.example` documents that there is nothing to configure.
 
-- a vision guess that pre-fills ingredients from a meal photo, which you then
-  confirm;
-- a plain-words narration of the **already-computed** ranking.
+## Run it
 
-The model never sees raw logs. Dart computes the statistics; only those
-computed numbers are sent, with a system prompt that forbids inventing patterns
-and requires "worth testing" framing. If no key is set, the ranked list still
-renders from the Dart stats alone. See [ARCHITECTURE.md](ARCHITECTURE.md).
-
-Your key is stored in the iOS keychain via `flutter_secure_storage`. It is
-never bundled, never committed, and never logged.
-
-## Privacy
-
-- **Local-first.** All health data lives in an on-device SQLite database.
-- **No account, no cloud, no analytics SDKs.** The only network call the app
-  can make is to the LLM API you opted into, over HTTPS, with your own key.
-- **Full export and full delete** are in Settings.
-
-## Setup
-
-Requires the Flutter SDK (3.41+) and Xcode for device builds.
+Flutter SDK 3.41+ and Xcode.
 
 ```bash
 git clone https://github.com/MaclaneZich/culprit.git
 cd culprit
 flutter pub get
-dart run build_runner build          # generates the Drift database code
-flutter run                          # or open ios/Runner.xcworkspace in Xcode
+dart run build_runner build   # Drift codegen
+flutter run                   # or open ios/Runner.xcworkspace
 ```
 
-Regenerating assets after editing the icon design:
-
-```bash
-dart run tool/generate_icon.dart     # SVG master -> assets/brand/app_icon_1024.png
-dart run flutter_launcher_icons      # -> iOS app icon set
-```
-
-### Adding your own API key
-
-There is nothing to configure at build time. Launch the app, go to
-**Settings → AI assist**, pick a provider, and paste your key. It goes straight
-to the keychain. To remove it, tap **Disconnect and delete key**.
-
-`.env.example` exists only to document that no key is read from the repo.
-
-## Screenshots
-
-Run the app on an iPhone simulator with a few days of data seeded, capture the
-four shots below, drop the PNGs in `docs/screenshots/`, and delete the comment
-above each one as you fill it in.
-
-<!-- SHOT 1 — timeline.png: the main timeline with 4-5 days logged, showing a
-     mix of ordinary meals and one symptom episode. This is the "logging is
-     cheap" claim; it should look dense but calm. -->
-<!-- ![Timeline](docs/screenshots/timeline.png) -->
-
-<!-- SHOT 2 — insights.png: the Insights ranking with one candidate card
-     expanded so the base rate vs. symptom rate comparison is visible. This is
-     the single most important image in the repo — it is the denominator
-     argument made concrete. -->
-<!-- ![Insights ranking](docs/screenshots/insights.png) -->
-
-<!-- SHOT 3 — challenge.png: a completed Challenge Lab readout, showing the
-     reintroduction schedule and its result. -->
-<!-- ![Challenge Lab](docs/screenshots/challenge.png) -->
-
-<!-- SHOT 4 — doctor-report.png: the doctor export preview. Use seeded demo
-     data only — never a real log. -->
-<!-- ![Doctor report](docs/screenshots/doctor-report.png) -->
+To use the optional AI assist, open Settings in the app and paste a provider key. To remove it, tap Disconnect and delete key.
 
 ## Tests
 
@@ -198,35 +64,15 @@ flutter analyze
 flutter test
 ```
 
-The suite concentrates where correctness matters most:
+`stats_engine_test` covers the denominator math on synthetic data, including the case the app exists for: a common innocent food that trails every symptom must not outrank a true trigger eaten a third as often. `insights_pipeline_test` runs that scenario end to end through the database, engine, Insights screen and PDF. `challenge_evaluator_test` covers the reintroduction rules. See [ARCHITECTURE.md](ARCHITECTURE.md) for the one rule that matters: statistics in Dart, the LLM only narrates.
 
-- `test/stats_engine_test.dart` — the denominator math, on synthetic data with
-  hand-computed expectations. Includes the case the whole app exists for: a
-  frequently-eaten innocent food that trails every symptom must **not** outrank
-  a real trigger eaten a third as often.
-- `test/insights_pipeline_test.dart` — the same scenario end to end, written
-  through the real database, ranked by the real engine, rendered by the real
-  Insights screen, and carried into the PDF.
-- `test/challenge_evaluator_test.dart` — the reproduced / did-not-reproduce /
-  inconclusive rules, including that non-adherent and unlogged days carry no
-  evidence.
-- `test/honest_copy_test.dart` — the copy guard described above.
-- `test/widget_test.dart` — the onboarding disclaimer gate.
+## Limitations
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). The architectural rule most worth
-reading before you touch the analysis path is in
-[ARCHITECTURE.md](ARCHITECTURE.md): **statistics in Dart, LLM only narrates.**
-
-## Not medical advice
-
-Culprit surfaces statistical associations from your own self-tracking to
-discuss with a clinician. It is not a diagnosis, not a medical device, and not
-a substitute for a GI workup. Do not eliminate foods or change treatment based
-on what this app shows you without talking to your doctor — and keep eating
-gluten until you have been tested for celiac disease.
+- Prototype. No App Store release, no TestFlight, no users yet.
+- Screenshots are not in the repo yet.
+- Association scores from one person's self-tracking are noisy. The challenge module exists because correlation alone is not an answer.
+- Not a medical device and not a diagnosis. Keep eating gluten until you have been tested for celiac disease.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

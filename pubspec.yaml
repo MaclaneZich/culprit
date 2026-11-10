@@ -1,6 +1,6 @@
 name: culprit
 description: >-
-  Culprit — a local-first iOS app that helps one person find which foods and
+  Culprit, a local-first iOS app that helps one person find which foods and
   life factors are associated with their GI symptoms. Outputs candidates to
   test with a clinician, never diagnoses.
 publish_to: 'none'
@@ -24,7 +24,7 @@ dependencies:
   path: ^1.9.1
 
   # Photo-assisted meal capture. image_picker's ImageSource.camera launches the
-  # native camera sheet — one tap, no custom preview stack (see ARCHITECTURE.md
+  # native camera sheet: one tap, no custom preview stack (see ARCHITECTURE.md
   # for why the `camera` package was dropped).
   image_picker: ^1.2.3
 
