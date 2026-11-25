@@ -3,7 +3,7 @@
 All notable changes to Culprit are documented here. This project follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] — 2026-07-20
+## [0.1.0] - 2026-07-20
 
 First tagged release. The core loop works end to end, and the app is fully
 usable with no API key.
@@ -53,7 +53,7 @@ usable with no API key.
 - Vision ingredient pre-fill from a meal photo, stored as unconfirmed and
   down-weighted in analysis until the user confirms it.
 - Plain-words narration of the already-computed ranking.
-- The model never receives raw logs — only a single photo, or computed
+- The model never receives raw logs, only a single photo, or computed
   statistics. Keys are entered in-app and stored in the iOS keychain.
 
 ### Privacy and safety

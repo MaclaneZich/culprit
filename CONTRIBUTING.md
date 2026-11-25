@@ -36,14 +36,14 @@ These are the reasons the app works. A PR that breaks one won't be merged.
    "associated with," "worth testing." `test/honest_copy_test.dart` enforces
    this; if your change trips it, change the copy, not the test.
 5. **Photo-assisted, not photo-only.** A photo is a capture and a timestamp.
-   The confirm step is where the real components — including the invisible
-   ones — get recorded.
+   The confirm step is where the true components, including the invisible
+   ones, get recorded.
 6. **Local-first.** No analytics SDKs, no telemetry, no account. The only
    permitted network call is to the user's own opt-in LLM API.
 
 ## Health data must never enter the repo
 
-- No real logs, exports, screenshots of real data, or database files. The
+- No actual logs, exports, screenshots of personal data, or database files. The
   `.gitignore` covers the obvious paths; check `git diff --staged` anyway.
 - Seed and demo data must be obviously synthetic.
 - No keys. The user's API key lives in the iOS keychain at runtime and is never
@@ -58,7 +58,7 @@ flutter test        # must be green
 
 If you touched anything under `lib/analysis/`, add tests. That directory has no
 Flutter dependency specifically so it can be tested hard and cheaply. Prefer
-hand-computed expectations over snapshotting whatever the code currently does —
+hand-computed expectations over snapshotting whatever the code currently does;
 a test that just records current behavior won't catch the bug that matters.
 
 If you touched the Drift schema, bump `schemaVersion` and add an `onUpgrade`
@@ -67,8 +67,8 @@ step. Additive changes only. Never lose a user's log.
 ## Style
 
 - Match the surrounding code. Dart formatting via `dart format`.
-- Colors, spacing, radii, and text styles come from `lib/core/theme/tokens.dart`
-  — no magic numbers in widgets.
+- Colors, spacing, radii, and text styles come from `lib/core/theme/tokens.dart`.
+  No magic numbers in widgets.
 - Comments should explain a constraint the code can't show. Skip comments that
   restate the next line.
 - Conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`).
@@ -76,7 +76,7 @@ step. Additive changes only. Never lose a user's log.
 ## Reporting bugs
 
 Include the Flutter version, the device or simulator, and what you expected.
-**Do not paste your log data** — describe the shape of the problem instead
+**Do not paste your log data.** Describe the shape of the problem instead
 (e.g. "a food eaten twice ranked above one eaten 30 times").
 
 ## A note on medical claims
