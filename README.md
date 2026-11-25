@@ -6,7 +6,11 @@ A local-first iOS app that ranks which foods and daily factors are associated wi
 [![License: MIT](https://img.shields.io/badge/License-MIT-A85638.svg)](LICENSE)
 ![Status](https://img.shields.io/badge/status-prototype%2C%20not%20shipped-orange)
 
-<img src="assets/brand/app_icon_1024.png" width="96" alt="Culprit app icon">
+| Timeline | Insights | Challenge | Doctor report |
+|---|---|---|---|
+| <img src="docs/screenshots/timeline.png" width="200" alt="Timeline of meals, check-ins and a symptom episode"> | <img src="docs/screenshots/insights.png" width="200" alt="Ranked candidates with rate versus base rate"> | <img src="docs/screenshots/challenge.png" width="200" alt="Completed reintroduction challenge readout"> | <img src="docs/screenshots/doctor-report.png" width="200" alt="One-page PDF summary for a clinician"> |
+
+Screenshots use synthetic data seeded on a simulator.
 
 - **What it does.** You log every meal (one tap to the camera, optional vision guess, you confirm), a short daily check-in, and symptom episodes with timing. The app compares each candidate's symptom rate against its base rate across all logged meals and shows a ranked shortlist worth testing, then runs a washout and on/off challenge and exports a PDF for your doctor.
 - **What I built.** Solo build, Flutter and Dart. A pure-Dart analysis engine with no Flutter imports, a Drift database with migrations from day one, an optional LLM layer that only narrates numbers already computed, and a test that fails the build if causal language reaches the user.
@@ -104,7 +108,7 @@ CI runs these on every push and pull request, regenerates the Drift code and fai
 
 ## What I would do next
 
-- Ship it: screenshots, TestFlight, and an App Store listing.
+- Ship it: TestFlight and an App Store listing.
 - Add the trigger-class library as data rather than code so it can grow without a release.
 - Put the challenge schedule on local notifications so on and off days are prompted, not remembered.
 
